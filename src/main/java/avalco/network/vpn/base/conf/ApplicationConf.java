@@ -4,7 +4,8 @@ public class ApplicationConf {
     String logPath;
     String errorLogPath;
     String type;
-
+    String serverHost;
+    int serverPort;
     public String getType() {
         return type;
     }
@@ -25,4 +26,11 @@ public class ApplicationConf {
         this.errorLogPath = errorLogPath;
     }
 
+    public int getServerPort() {
+        return serverPort;
+    }
+
+    public String getServerHost() {
+        return serverHost;
+    }
 }

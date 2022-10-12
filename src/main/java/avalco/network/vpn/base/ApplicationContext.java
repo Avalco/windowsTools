@@ -78,4 +78,7 @@ public abstract class ApplicationContext {
         }
         return conf;
     }
+    public ApplicationConf getApplicationConf(){
+        return applicationConf;
+    }
 }

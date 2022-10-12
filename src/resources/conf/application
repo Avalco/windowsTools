@@ -1,3 +1,5 @@
-ServerPort:9000
+type : client
+server-host : 116.205.246.3
+server-port:9000
 log-path: log
 error-log-path:log

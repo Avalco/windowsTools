@@ -22,12 +22,12 @@ public class Application extends ApplicationContext {
         recoveryList=new ArrayList<>();
         switch (applicationConf.getType()){
             case "Server":
-                VpnServer vpnServer=new VpnServer();
+                VpnServer vpnServer=new VpnServer(this);
                 runnable=vpnServer;
                 recoveryList.add(vpnServer);
                 break;
             case "Client":
-                VpnClient vpnClient=new VpnClient();
+                VpnClient vpnClient=new VpnClient(this);
                 recoveryList.add(vpnClient);
                 runnable=vpnClient;
                 break;

@@ -1,8 +1,15 @@
 package avalco.network.vpn.server;
 
+import avalco.network.vpn.base.ApplicationContext;
 import avalco.network.vpn.base.interfaces.ResourceRecovery;
 
 public class VpnServer implements ResourceRecovery ,Runnable{
+    private final ApplicationContext context;
+
+    public VpnServer(ApplicationContext context) {
+        this.context = context;
+    }
+
     @Override
     public void recoverResource() {
 
