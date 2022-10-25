@@ -15,7 +15,7 @@ public class LogEvent {
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
     @Override
     public String toString() {
-        return getPrefix()+level.name+"-"+tag+" "+msg+"\n";
+        return getPrefix()+level.name+"-"+tag+" "+msg+(throwable==null?"":" cause by:")+"\n";
     }
     public String getPrefix(){
         return format.format(time)+" "+processID+"-"+threadID+"@"+threadName+"  ";

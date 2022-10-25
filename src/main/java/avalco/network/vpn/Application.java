@@ -41,10 +41,15 @@ public class Application extends ApplicationContext {
 
     @Override
     public void shutdown() {
-        logUtil.terminal();
-        for (ResourceRecovery resourceRecovery:recoveryList){
-            resourceRecovery.recoverResource();
+        if (logUtil!=null){
+            logUtil.terminal();
         }
+        if (recoveryList!=null){
+            for (ResourceRecovery resourceRecovery:recoveryList){
+                resourceRecovery.recoverResource();
+            }
+        }
+
     }
 
     @Override

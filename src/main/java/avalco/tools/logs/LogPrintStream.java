@@ -20,7 +20,7 @@ public class LogPrintStream extends PrintStream{
         @Override
         public void print(String s) {
             s=s==null?prefix+"null":prefix+s;
-            super.println(s);
+            super.print(s);
         }
         public LogPrintStream setPrefix(String prefix){
             this.prefix=prefix;

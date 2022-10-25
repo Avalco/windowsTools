@@ -1,10 +1,12 @@
 package avalco.tools.logs;
 
+import avalco.network.vpn.base.exception.NoExitException;
 import avalco.network.vpn.base.interfaces.ResourceRecovery;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.charset.StandardCharsets;
 
 import java.util.concurrent.CountDownLatch;
@@ -16,16 +18,17 @@ public class Logger implements ResourceRecovery {
     LinkedBlockingDeque<LogEvent> linkedBlockingDeque;
     CacheList eventCachePool;
     boolean running;
-    CountDownLatch countDownLatch;
     private LogPrintStream logPrintStream;
+    private OutThread outThread;
     private static final int cachePoolCapacity=100;
     public Logger(OutputStream outputStream) {
         this.outputStream = outputStream;
         eventCachePool= new CacheList(cachePoolCapacity);
         running=true;
-        countDownLatch=new CountDownLatch(1);
         logPrintStream=new LogPrintStream(outputStream);
-        new OutThread().start();
+        linkedBlockingDeque=new LinkedBlockingDeque<>();
+        outThread=new OutThread();
+        outThread.start();
     }
 
     public void append(LogLevel level,String tag,String msg,Throwable throwable){
@@ -45,11 +48,7 @@ public class Logger implements ResourceRecovery {
     @Override
     public void recoverResource() {
         running=false;
-        try {
-            countDownLatch.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        outThread.interrupt();
     }
 
     class OutThread extends Thread{
@@ -68,9 +67,13 @@ public class Logger implements ResourceRecovery {
                     }
                 }
                 outputStream.close();
-                countDownLatch.countDown();
             } catch (InterruptedException | IOException e) {
-                throw new RuntimeException(e);
+                if (e instanceof ClosedByInterruptException){
+                    throw new NoExitException(e);
+                }else
+                {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }
@@ -83,6 +86,7 @@ public class Logger implements ResourceRecovery {
         public CacheList(int cachePoolCapacity) {
             CacheNode cacheNode= new CacheNode();
             first=cacheNode;
+            first.logEvent=new LogEvent();
             last=cacheNode;
             for (int i=0;i<cachePoolCapacity-1;i++){
                 add(new LogEvent());
@@ -93,6 +97,7 @@ public class Logger implements ResourceRecovery {
             CacheNode cacheNode= new CacheNode();
             cacheNode.logEvent=logEvent;
             last.next=cacheNode;
+            last=cacheNode;
         }
         public LogEvent get(){
            LogEvent logEvent=first.logEvent;

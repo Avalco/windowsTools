@@ -1,0 +1,4 @@
+private-key-path : server.psk
+mask : 255.255.225.0
+ip : 192.168.65.1
+gateway : 192.168.65.1

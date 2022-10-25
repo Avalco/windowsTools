@@ -5,6 +5,7 @@ import avalco.tools.files.FileUtil;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -20,10 +21,12 @@ public class LogUtil {
     private final LogConf logConf;
 
     private Logger logger;
+    private Logger debugLogger;
     private final Timer timer;
     private static final long DAY=24*60*60*1000;
     private static final String TAG="LogUtils";
     private LogUtil(String logPath, String logConfig) {
+        debugLogger=new Logger(System.out);
         logDirector = new File(logPath);
         try {
             logConf = new ConfParse<LogConf>(LogConf.class).parse(new File(logConfig));
@@ -97,7 +100,7 @@ public class LogUtil {
 
     private Logger createLogger() throws IOException {
         File file= FileUtil.createFileByCalender(logDirector, logConf.logName);
-        return new Logger(Files.newOutputStream(file.toPath()));
+        return new Logger(Files.newOutputStream(file.toPath(), StandardOpenOption.APPEND,StandardOpenOption.CREATE));
     }
 
     public static LogUtil newInstance(String logPath, String logConfig) {
@@ -123,6 +126,7 @@ public class LogUtil {
 
     public void e(String tag, String msg, Throwable throwable) {
         logger.append(LogLevel.ERROR, tag, msg, throwable);
+        debugLogger.append(LogLevel.ERROR, tag, msg, throwable);
     }
 
 }

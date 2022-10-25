@@ -2,6 +2,7 @@ package avalco.network.vpn.base;
 
 import avalco.network.vpn.base.conf.ApplicationConf;
 
+import avalco.network.vpn.base.exception.NoExitException;
 import avalco.tools.files.FileUtil;
 import avalco.tools.logs.LogPrintStream;
 import avalco.tools.logs.LogUtil;
@@ -45,13 +46,17 @@ public abstract class ApplicationContext {
         Thread.UncaughtExceptionHandler myUncaughtExceptionHandler = new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
+                e.printStackTrace();
                 try {
                     File file=FileUtil.createFileByCalender(errorLog,applicationConf.getType()+".error");
                     LogPrintStream logPrintStream = new LogPrintStream(Files.newOutputStream(file.toPath(), StandardOpenOption.CREATE, StandardOpenOption.APPEND));
                     e.printStackTrace(logPrintStream);
-                    System.exit(-100);
+                    if (! (e instanceof NoExitException)){
+                        System.exit(-100);
+                    }
                 } catch (Exception error) {
                     defaultUncaughtExceptionHandler.uncaughtException(t, e);
+                    System.exit(-100);
                 }
             }
         };
@@ -65,11 +70,11 @@ public abstract class ApplicationContext {
     public abstract void start();
     public abstract void shutdown();
     protected abstract void onApplicationExit();
-    protected File getConfigFile(String name){
+    public File getConfigFile(String name){
         File conf=FileUtil.getFile("config"+File.separator+name);
         if (!conf.exists()){
             try {
-                conf=FileUtil.copyFileFromResources("config/application",name);
+                conf=FileUtil.copyFileFromResources(conf.getAbsolutePath(), "conf/"+name);
             } catch (IOException e) {
                 LogPrintStream logPrintStream = new LogPrintStream(System.out);
                 e.printStackTrace(logPrintStream);
@@ -80,5 +85,9 @@ public abstract class ApplicationContext {
     }
     public ApplicationConf getApplicationConf(){
         return applicationConf;
+    }
+
+    public LogUtil getLogUtil() {
+        return logUtil;
     }
 }

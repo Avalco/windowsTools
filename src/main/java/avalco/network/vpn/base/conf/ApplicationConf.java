@@ -6,6 +6,14 @@ public class ApplicationConf {
     String type;
     String serverHost;
     int serverPort;
+    String userName;
+    String password;
+    String serverKeyPath;
+
+    public String getServerKeyPath() {
+        return serverKeyPath;
+    }
+
     public String getType() {
         return type;
     }
@@ -32,5 +40,13 @@ public class ApplicationConf {
 
     public String getServerHost() {
         return serverHost;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

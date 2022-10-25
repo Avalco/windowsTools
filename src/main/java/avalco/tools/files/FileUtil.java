@@ -2,6 +2,8 @@ package avalco.tools.files;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 
 public class FileUtil {
@@ -9,7 +11,7 @@ public class FileUtil {
     public static String libDirectory="lib";
     private static final SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
     public static InputStream getResourceFileStream(String fileName){
-        return getStreamFormJar(resourceDirectory+File.separator+fileName);
+        return getStreamFormJar(resourceDirectory+"/"+fileName);
     }
     public static InputStream getLibFileStream(String fileName){
         return getStreamFormJar(libDirectory+File.separator+fileName);
@@ -32,6 +34,9 @@ public class FileUtil {
     }
     public static File copyFileFromResources(String des,String sour) throws IOException {
         File dFile=new File(des);
+        if (!dFile.getParentFile().exists()){
+            dFile.getParentFile().mkdirs();
+        }
         InputStream inputStream=getResourceFileStream(sour);
         OutputStream outputStream= Files.newOutputStream(dFile.toPath());
         byte[]bytes=new byte[1024];
@@ -45,8 +50,11 @@ public class FileUtil {
         return dFile;
     }
     public static File createFileByCalender(File directory,String name){
+        if (!directory.exists()){
+            directory.mkdirs();
+        }
        String date= simpleDateFormat.format(System.currentTimeMillis());
        int l=name.lastIndexOf(".");
-       return new File(directory,name.substring(0,l)+"-"+date+"."+name.substring(l));
+       return new File(directory,name.substring(0,l)+"-"+date+name.substring(l));
     }
 }
