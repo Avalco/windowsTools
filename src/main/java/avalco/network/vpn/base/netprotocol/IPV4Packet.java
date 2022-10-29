@@ -3,6 +3,8 @@ package avalco.network.vpn.base.netprotocol;
 import avalco.network.vpn.base.exception.IPPacketException;
 
 public class IPV4Packet extends IPPacket{
+    int srcIP;
+    int dstIP;
     //头部
         //0-3 IP协议版本: IPv4 值为0100，IPv6 值为0110
         //4-7 首部的长度: 占4位，最大表示的十进制数为15，该字段的值*4才代表首部长度字节数。首部长度不是4的整数倍时,用最后的填充字段填充。
@@ -35,13 +37,22 @@ public class IPV4Packet extends IPPacket{
         p2=bytes[13]&0xff;
         p3=bytes[14]&0xff;
         p4=bytes[15]&0xff;
+        srcIP=((bytes[12]&0xff)<<24)+((bytes[13]&0xff)<<16)+((bytes[14]&0xff)<<8)+((bytes[15]&0xff));
         src=p1+"."+p2+"."+p3+"."+p4;
         p1=bytes[16]&0xff;
         p2=bytes[17]&0xff;
         p3=bytes[18]&0xff;
         p4=bytes[19]&0xff;
+        dstIP=((bytes[16]&0xff)<<24)+((bytes[17]&0xff)<<16)+((bytes[18]&0xff)<<8)+((bytes[19]&0xff));
         dst=p1+"."+p2+"."+p3+"."+p4;
         return this;
     }
 
+    public int getSrcIP() {
+        return srcIP;
+    }
+
+    public int getDstIP() {
+        return dstIP;
+    }
 }

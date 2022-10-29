@@ -1,0 +1,4 @@
+#日志名字
+log-name : application.log
+#日志清理周期
+duration : 30

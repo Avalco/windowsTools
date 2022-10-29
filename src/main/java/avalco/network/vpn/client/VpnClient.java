@@ -8,6 +8,7 @@ import avalco.network.vpn.base.conf.ApplicationConf;
 import avalco.network.vpn.base.exception.IPPacketException;
 import avalco.network.vpn.base.interfaces.ResourceRecovery;
 import avalco.network.vpn.base.netprotocol.IPPacket;
+import avalco.network.vpn.base.netprotocol.IPV4Packet;
 import avalco.network.vpn.base.netprotocol.IpProtocolTool;
 import avalco.network.vpn.base.orders.Order;
 import avalco.network.vpn.base.orders.OrderFactory;
@@ -31,7 +32,9 @@ public class VpnClient  implements ResourceRecovery ,Runnable{
     private final ApplicationContext context;
     private Socket client;
     private String token;
+    private ClientConf clientConf;
     private ExecutorService executorService;
+    private PacketSender packetSender;
     private  DatagramSocket datagramSocket;
     public VpnClient(ApplicationContext context) {
         this.context = context;
@@ -69,7 +72,7 @@ public class VpnClient  implements ResourceRecovery ,Runnable{
             orderSender.send(OrderFactory.Auth(applicationConf.getUserName(),applicationConf.getPassword()));
             BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(client.getInputStream()));
             String s= bufferedReader.readLine();
-            System.out.println(s);
+            context.getLogUtil().d(TAG,s);
             Order order=Order.format(s);
             if (!order.getCommand().equals("TOKEN")){
                 throw new RuntimeException("Auth error");
@@ -77,7 +80,7 @@ public class VpnClient  implements ResourceRecovery ,Runnable{
             token=order.getParams()[0];
             File configFile=context.getConfigFile(CONFIG_NAME);
             ConfParse<ClientConf> confParse=new ConfParse<>(ClientConf.class);
-            ClientConf clientConf= confParse.parse(configFile);
+            clientConf= confParse.parse(configFile);
             if (clientConf.type==0){
                 orderSender.send(OrderFactory.DHCP(token));
                 s=bufferedReader.readLine();
@@ -95,11 +98,15 @@ public class VpnClient  implements ResourceRecovery ,Runnable{
             orderSender.send(OrderFactory.getPort(token));
             s=bufferedReader.readLine();
             int port=Integer.parseInt(s);
+            if (port==-1){
+                throw new RuntimeException("remote port error");
+            }
             datagramSocket=new DatagramSocket();
-            PacketSender packetSender=new PacketSender(applicationConf.getServerHost(),port,datagramSocket,token,key,iv);
+            packetSender=new PacketSender(applicationConf.getServerHost(),port,datagramSocket,token,key,iv);
             executorService.execute(packetSender);
+            executorService.execute(new HeartBeatRunnable());
             VirtualInternetFace virtualInternetFace=new VirtualInternetFace();
-            virtualInternetFace.createIFace("Vpn-tun");
+            virtualInternetFace.createIFace("Vpn-tun1");
             byte[]ip= IpProtocolTool.encodeIp(clientConf.ip);
             int mask=IpProtocolTool.countMask(clientConf.mask);
             virtualInternetFace.setIFaceConf(ip,mask);
@@ -114,8 +121,9 @@ public class VpnClient  implements ResourceRecovery ,Runnable{
                 @Override
                 public void receivePacket(byte[] bytes) {
                     try {
-                        IPPacket ipPacket=IPPacket.handlePacket(bytes);
-                        if (ipPacket.getDst().substring(0,mask).equals(clientConf.gateway.substring(0,mask))){
+                        IPV4Packet ipPacket= (IPV4Packet) IPPacket.handlePacket(bytes);
+                        if (IpProtocolTool.union(mask,ipPacket.getSrcIP(),ipPacket.getDstIP())){
+                           context.getLogUtil().d(TAG,"route packet:"+ipPacket.toString());
                             packetSender.send(bytes);
                         }
                     } catch (IPPacketException e) {
@@ -128,7 +136,18 @@ public class VpnClient  implements ResourceRecovery ,Runnable{
             context.shutdown();
         }
     }
+  private class HeartBeatRunnable implements Runnable{
 
+      @Override
+      public void run() {
+          packetSender.send(IpProtocolTool.makeIcmp(clientConf.gateway, clientConf.ip));
+          try {
+              Thread.sleep(5000);
+          } catch (InterruptedException e) {
+              throw new RuntimeException(e);
+          }
+      }
+  }
 
 
 }

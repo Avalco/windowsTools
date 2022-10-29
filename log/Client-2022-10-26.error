@@ -1,0 +1,8 @@
+2022-10-26 17:59:25:192 15828-1@main  java.lang.UnsatisfiedLinkError: Can't load library: E:\xzf\source\winTools\WinTools\wintun.dll
+2022-10-26 17:59:25:192 15828-1@main  	at java.lang.ClassLoader.loadLibrary(ClassLoader.java:1823)
+2022-10-26 17:59:25:192 15828-1@main  	at java.lang.Runtime.load0(Runtime.java:810)
+2022-10-26 17:59:25:192 15828-1@main  	at java.lang.System.load(System.java:1086)
+2022-10-26 17:59:25:192 15828-1@main  	at avalco.network.vpn.base.VirtualInternetFace.<clinit>(VirtualInternetFace.java:11)
+2022-10-26 17:59:25:192 15828-1@main  	at avalco.network.vpn.client.VpnClient.run(VpnClient.java:105)
+2022-10-26 17:59:25:192 15828-1@main  	at avalco.network.vpn.Application.start(Application.java:39)
+2022-10-26 17:59:25:192 15828-1@main  	at avalco.network.vpn.Application.main(Application.java:17)

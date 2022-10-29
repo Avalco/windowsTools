@@ -11,12 +11,14 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 
 public class PacketReceiver implements Runnable{
@@ -45,12 +47,17 @@ byte[]buffer=new byte[65535];
         DatagramPacket datagramPacket=new DatagramPacket(buffer,buffer.length);
         while (!Thread.interrupted()){
             try {
+               //logUtils.d("receive");
                 datagramSocket.receive(datagramPacket);
+              // logUtils.d("receive packet "+datagramPacket.getLength());
                 String token=new String(buffer,0,header.getBytes(StandardCharsets.UTF_8).length,StandardCharsets.UTF_8);
+              // logUtils.d("receive packet token "+token);
                 if (token.equals(header)){
                     try {
                         byte[]bytes;
-                        bytes = cipher.doFinal(datagramPacket.getData(),token.getBytes(StandardCharsets.UTF_8).length,datagramPacket.getLength());
+                        int headLength=header.getBytes(StandardCharsets.UTF_8).length;
+                        bytes = cipher.doFinal(datagramPacket.getData(),headLength,datagramPacket.getLength()-headLength);
+                      // logUtils.d("receive packet"+bytes.length+" bytes "+ Arrays.toString(bytes));
                         receiveListener.receivePacket(bytes,bytes.length);
                     } catch (IllegalBlockSizeException | BadPaddingException e) {
                         throw new NoExitException(e);

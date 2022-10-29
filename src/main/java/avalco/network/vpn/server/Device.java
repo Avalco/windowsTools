@@ -5,7 +5,7 @@ import avalco.network.vpn.base.orders.Order;
 import avalco.network.vpn.security.AesSocketWrapper;
 import avalco.network.vpn.security.CipherConnection;
 
-import avalco.network.vpn.security.exception.CipherHandShakeException;
+
 
 import java.io.*;
 import java.net.Socket;
@@ -54,7 +54,7 @@ public class Device implements Runnable{
                 return;
             }
             String reply=handle(s);
-            System.out.println(reply);
+            server.getLogUtil().d(TAG,reply);
             bufferedWriter.write(reply);
             bufferedWriter.newLine();
             bufferedWriter.flush();
@@ -81,7 +81,7 @@ public class Device implements Runnable{
     }
 
     private String handle(String s) {
-        System.out.println("handel " +s);
+       server.getLogUtil().d(TAG,"handel " +s);
         Order order=Order.format(s);
         if (!order.getCommand().equals("AUTH")&&!order.getParams()[0].equals(token)){
             return "error token";
@@ -105,6 +105,7 @@ public class Device implements Runnable{
                 reply=dataPort+"";
                 break;
         }
+        server.getLogUtil().d(TAG,"reply:"+reply);
         return reply;
     }
     public void  close(String s){

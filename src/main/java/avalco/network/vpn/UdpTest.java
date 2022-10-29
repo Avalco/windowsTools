@@ -14,7 +14,7 @@ public class UdpTest {
             while (true){
                 DatagramPacket datagramPacket=new DatagramPacket(bys, bys.length);
                 datagramSocket.receive(datagramPacket);
-                System.out.println("输入数据为："+new String(datagramPacket.getData(),0,datagramPacket.getLength()));
+                //logUtils.d("输入数据为："+new String(datagramPacket.getData(),0,datagramPacket.getLength()));
                 String replyMsg="received:"+datagramPacket.getLength();
                 DatagramPacket reply=new DatagramPacket(replyMsg.getBytes(StandardCharsets.UTF_8),replyMsg.getBytes(StandardCharsets.UTF_8).length,datagramPacket.getSocketAddress());
                 datagramSocket.send(reply);

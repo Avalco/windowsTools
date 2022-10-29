@@ -1,0 +1,8 @@
+type : Client
+server-host : 116.205.246.3
+server-port:9000
+log-path: log
+error-log-path:log
+user-name : windows
+password : Xzf20220810.
+server-key-path : server.pub

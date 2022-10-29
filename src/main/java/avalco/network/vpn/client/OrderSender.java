@@ -18,7 +18,7 @@ public class OrderSender implements Runnable {
         while (!Thread.interrupted()){
             try {
                 Order order=linkedBlockingQueue.take();
-                System.out.println("take:"+order);
+               //logUtils.d("take:"+order);
                 bufferedWriter.write(order.toString());
                 bufferedWriter.newLine();
                 bufferedWriter.flush();

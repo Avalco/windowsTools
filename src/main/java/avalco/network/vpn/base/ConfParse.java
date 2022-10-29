@@ -91,7 +91,7 @@ public class ConfParse<T> {
         Matcher matcher=pattern.matcher(key);
         while (matcher.find()){
             String s=matcher.group();
-//            System.out.println(s);
+//            logUtils.d(s);
             key= key.replace(s,s.toUpperCase(Locale.ROOT).substring(1));
         }
         return key;

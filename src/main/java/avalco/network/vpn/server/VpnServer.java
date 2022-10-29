@@ -102,7 +102,7 @@ public class VpnServer implements ResourceRecovery ,Runnable{
             executorService.execute(new DataSender());
             while (!shutdown){
                 Socket socket=serverSocket.accept();
-                executorService.execute(new Device(socket,cipherConnection,datagramSocket.getPort(),this));
+                executorService.execute(new Device(socket,cipherConnection,datagramSocket.getLocalPort(),this));
             }
         } catch (IOException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
@@ -116,10 +116,13 @@ public class VpnServer implements ResourceRecovery ,Runnable{
                 try {
                     DatagramPacket datagramPacket=new DatagramPacket(buffer, buffer.length);
                     datagramSocket.receive(datagramPacket);
+                  context.getLogUtil().d(TAG,"receive");
                     String token=new String(datagramPacket.getData(),0,headLength,StandardCharsets.UTF_8);
+                  context.getLogUtil().d(TAG,"receive token:"+token);
                     if (deviceMap.get(token)!=null){
                         Packet packet=new Packet();
                         packet.srcAddress=datagramPacket.getSocketAddress();
+                      context.getLogUtil().d(TAG,"receive srcAddress:"+packet.srcAddress);
                         packet.token=token;
                         packet.data=Arrays.copyOfRange(datagramPacket.getData(),headLength,datagramPacket.getLength());
                         dataHandle.hand(packet);
@@ -139,6 +142,7 @@ public class VpnServer implements ResourceRecovery ,Runnable{
             while (!Thread.interrupted()&&!shutdown){
                 try {
                     Packet packet=packets.take();
+                   context.getLogUtil().d(TAG,"take packet");
                     try {
                         Device device=deviceMap.get(packet.token);
                         Cipher cipher=Cipher.getInstance("AES/CTR/NoPadding");
@@ -146,6 +150,7 @@ public class VpnServer implements ResourceRecovery ,Runnable{
                         IvParameterSpec ivParameterSpec=new IvParameterSpec(device.iv);
                         cipher.init(Cipher.DECRYPT_MODE,keySpec,ivParameterSpec);
                         packet.data= cipher.doFinal(packet.data);
+                      context.getLogUtil().d(TAG,"decode packet "+Arrays.toString(packet.data));
                         VpnServer.this.packets.add(packet);
                     }catch (Exception e){
                         context.getLogUtil().e(TAG,"dataHandle",e);
@@ -167,6 +172,7 @@ public class VpnServer implements ResourceRecovery ,Runnable{
                     Packet packet=packets.take();
                     try {
                         IPPacket ipv4Packet= IPPacket.handlePacket(packet.data);
+                      context.getLogUtil().d(TAG,"handle packet:"+ ipv4Packet.toString());
                         String dst= ipv4Packet.getDst();
                         String src=ipv4Packet.getSrc();
                         Route dstRoute= routeTables.getRoute(dst);
@@ -174,6 +180,8 @@ public class VpnServer implements ResourceRecovery ,Runnable{
                         srcRout.socketAddress= packet.srcAddress;
                         if (dstRoute!=null){
                             Device device=deviceMap.get(dstRoute.token);
+                          context.getLogUtil().d(TAG,"dstroute token:"+dstRoute.token);
+                          context.getLogUtil().d(TAG,"dstroute:"+(device==null));
                             if (device!=null&&dstRoute.socketAddress!=null){
                                 Cipher cipher=Cipher.getInstance("AES/CTR/NoPadding");
                                 SecretKeySpec keySpec=new SecretKeySpec(device.key,"AES");
@@ -183,6 +191,8 @@ public class VpnServer implements ResourceRecovery ,Runnable{
                                 byte[] buffer= Arrays.copyOf(dstRoute.token.getBytes(StandardCharsets.UTF_8)
                                         ,headLength+packet.data.length);
                                 System.arraycopy(packet.data,0,buffer,headLength,packet.data.length);
+                              context.getLogUtil().d(TAG,"dstroute address "+dstRoute.socketAddress);
+                              context.getLogUtil().d(TAG,"dstroute buffer "+buffer.length+" "+Arrays.toString(buffer));
                                 DatagramPacket datagramPacket=new DatagramPacket(buffer,buffer.length,dstRoute.socketAddress);
                                 datagramSocket.send(datagramPacket);
                             }
@@ -198,7 +208,7 @@ public class VpnServer implements ResourceRecovery ,Runnable{
     }
     public String registerDevice(String param,Device device) {
         String d=tokenMap.getOrDefault(param,null);
-        System.out.println("registerDevice "+d);
+      context.getLogUtil().d(TAG,"registerDevice "+d);
         if (d!=null){
             tokenMap.remove(param);
             Device device1=deviceMap.remove(d);
@@ -247,19 +257,19 @@ private static final String TokenCharSet="0123456789zxcvbnmasdfghjklqwertyuiop=+
     private String generateNewIpv4() {
         try {
             byte[]ip=encodeIp(serverConf.gateway);
-            System.out.println("mask:"+serverConf.mask);
+          context.getLogUtil().d(TAG,"mask:"+serverConf.mask);
             int mask=countMask(serverConf.mask);
-            System.out.println("masknum:"+mask);
+          context.getLogUtil().d(TAG,"masknum:"+mask);
             int hostNum=32-mask;
-            System.out.println("hostnum:"+hostNum);
+          context.getLogUtil().d(TAG,"hostnum:"+hostNum);
             int maxHostNum= (int) (Math.pow(2,hostNum)-2);
-            int host= (int) (Math.random()*maxHostNum+1);
-            System.out.println("host:"+host);
+            int host= (int) (Math.random()*maxHostNum+2);
+          context.getLogUtil().d(TAG,"host:"+host);
             //1-2^hostNum-2;
             int index=4-hostNum/8;//2
-            System.out.println("index:"+index);
+          context.getLogUtil().d(TAG,"index:"+index);
             int remain=hostNum%8;//4
-            System.out.println("remain:"+remain);
+          context.getLogUtil().d(TAG,"remain:"+remain);
             if (remain!=0){
                 ip[index-1]= (byte) (ip[index-1] |((host>>>(hostNum-remain))));
             }
@@ -272,7 +282,7 @@ private static final String TokenCharSet="0123456789zxcvbnmasdfghjklqwertyuiop=+
             p3=ip[2]&0xff;
             p4=ip[3]&0xff;
             String nIp= p1+"."+p2+"."+p3+"."+p4;
-            System.out.println("nip:"+nIp);
+          context.getLogUtil().d(TAG,"nip:"+nIp);
             if (ipPool.add(nIp)){
                 return nIp;
             }

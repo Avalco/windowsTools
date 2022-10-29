@@ -16,11 +16,11 @@ import java.util.Arrays;
 public class Test {
     private static byte[] buffer=null;
     public static void main(String [] args){
-        try {
-            System.out.println(IpProtocolTool.countMask("255.255.255.0"));
+        /*try {
+            //logUtils.d(IpProtocolTool.countMask("255.255.255.0"));
         } catch (InternetAddressException e) {
             throw new RuntimeException(e);
-        }
+        }*/
       /*  VirtualInternetFace virtualInternetFace=new VirtualInternetFace();
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             @Override
@@ -38,10 +38,10 @@ public class Test {
                     if (buffer==null){
                         buffer=bytes;
                     }
-                    System.out.println(bytes.length+" "+Arrays.toString(bytes));
+                    logUtils.d(bytes.length+" "+Arrays.toString(bytes));
                     try {
                         IPPacket ipPacket=IPPacket.handlePacket(bytes);
-                        System.out.println(ipPacket.toString()+"\n"+"data:["+new String(bytes,ipPacket.getHeaderLength(),bytes.length- ipPacket.getHeaderLength())+"]");
+                        logUtils.d(ipPacket.toString()+"\n"+"data:["+new String(bytes,ipPacket.getHeaderLength(),bytes.length- ipPacket.getHeaderLength())+"]");
                     } catch (IPPacketException e) {
                         e.printStackTrace(new PrintStream(System.out));
                     }
@@ -54,9 +54,9 @@ public class Test {
                 try {
                     Thread.sleep(30000);
                     IPPacket ipPacket=IPPacket.handlePacket(buffer);
-                    System.out.println("buffer handle:"+ipPacket.toString()+"\n");
+                    logUtils.d("buffer handle:"+ipPacket.toString()+"\n");
 
-                    System.out.println("send");
+                    logUtils.d("send");
                     byte[]bytes=new byte[28];
                     Arrays.fill(bytes, (byte) 0);
                     bytes[0]=0x45;
@@ -78,9 +78,9 @@ public class Test {
                     cm=IPPacket.IPChecksum(bytes,20,8);
                     bytes[22]= (byte) ((cm&0xff00)>>>8);
                     bytes[23]= (byte) (cm&0x00ff);
-                    System.out.println(Arrays.toString(bytes));
+                    logUtils.d(Arrays.toString(bytes));
                     virtualInternetFace.sendPackets(bytes,28);
-                    System.out.println("send success");
+                    logUtils.d("send success");
                 } catch (InterruptedException | IPPacketException e) {
                     throw new RuntimeException(e);
                 }
@@ -91,14 +91,14 @@ public class Test {
             public void run() {
                 try {
                     Thread.sleep(600000);
-                    System.out.println("1-thread-close");
+                    logUtils.d("1-thread-close");
                     virtualInternetFace.close();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
         }).start();
-        System.out.println("main-thread-close");*/
+        logUtils.d("main-thread-close");*/
        /* try {
             Thread.sleep(5000000);
         } catch (InterruptedException e) {
@@ -121,7 +121,7 @@ public class Test {
                         BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(inputStream));
                         String s;
                         while ((s= bufferedReader.readLine())!=null){
-                            System.out.println("receive:"+s);
+                            logUtils.d("receive:"+s);
                             bufferedWriter.write(("reply to:"+s));
                             bufferedWriter.newLine();
                             bufferedWriter.flush();
@@ -154,7 +154,7 @@ public class Test {
                            bufferedWriter.newLine();
                            bufferedWriter.flush();
                            String s1= bufferedReader.readLine();
-                           System.out.println("reply from server:"+s1);
+                           logUtils.d("reply from server:"+s1);
                        }
                        inputStream.close();
                        outputStream.close();

@@ -80,7 +80,7 @@ public class JIntellitypeDemo extends JFrame implements HotkeyListener, Intellit
 	 * @param args any command line arguments
 	 */
 	public static void main(String[] args) {
-		System.out.println(new File(".").getAbsolutePath());
+	//	logUtils.d(new File(".").getAbsolutePath());
 		// first check to see if an instance of this application is already
 		// running, use the name of the window title of this JFrame for checking
 		if (JIntellitype.checkInstanceAlreadyRunning("JIntellitype Test Application")) {

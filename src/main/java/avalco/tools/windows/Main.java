@@ -41,7 +41,7 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
+   /* public static void main(String[] args) {
         for (KeyCode keyCode:KeyCode.values()){
             JIntellitype.getInstance().registerHotKey(keyCode.identify, keyCode.getModify(), keyCode.getCode());
         }
@@ -57,9 +57,9 @@ public class Main {
                         //创建一个robot对象
                         Robot robut= null;
                         try {
-                            System.out.println("create screenshot");
-                            System.out.println(System.currentTimeMillis());
-                            robut = new Robot();
+//                           logUtils.d("create screenshot");
+//                           logUtils.d(System.currentTimeMillis());
+//                            robut = new Robot();
                             //获取屏幕分辨率
                             Dimension d=  Toolkit.getDefaultToolkit().getScreenSize();
                             //创建该分辨率的矩形对象
@@ -69,9 +69,9 @@ public class Main {
                             SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss-SSS");
                             String name="screenshot-"+simpleDateFormat.format(System.currentTimeMillis())+".png";
                             File file=new File("E:\\xzf\\WinTools\\Screenshot\\"+name);
-                            System.out.println("create screenshot:"+file.getAbsolutePath());
-                            ImageIO.write(bufferedImage,"png",file);
-                            System.out.println(System.currentTimeMillis());
+//                           logUtils.d("create screenshot:"+file.getAbsolutePath());
+//                            ImageIO.write(bufferedImage,"png",file);
+//                           logUtils.d(System.currentTimeMillis());
                         } catch (AWTException | IOException e) {
                             e.printStackTrace();
                         }
@@ -79,5 +79,5 @@ public class Main {
                 }
             }
         });
-    }
+    }*/
 }

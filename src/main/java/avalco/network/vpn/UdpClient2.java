@@ -37,7 +37,7 @@ public class UdpClient2 {
                         while (true){
                             DatagramPacket datagramPacket=new DatagramPacket(bys, bys.length);
                             datagramSocket.receive(datagramPacket);
-                            System.out.println("收到回复："+new String(datagramPacket.getData(),0,datagramPacket.getLength()));
+                            //logUtils.d("收到回复："+new String(datagramPacket.getData(),0,datagramPacket.getLength()));
                         }
                     }catch (IOException e){
                         e.printStackTrace();
